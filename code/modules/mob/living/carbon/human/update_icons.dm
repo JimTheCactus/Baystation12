@@ -134,8 +134,6 @@ Please contact me on #coderbus IRC. ~Carn x
 /mob/living/carbon/human
 	var/list/overlays_standing[TOTAL_LAYERS]
 	var/previous_damage_appearance // store what the body last looked like, so we only have to update it if something changed
-	var/icon/race_icon
-	var/icon/deform_icon
 
 //UPDATES OVERLAYS FROM OVERLAYS_LYING/OVERLAYS_STANDING
 //this proc is messy as I was forced to include some old laggy cloaking code to it so that I don't break cloakers
@@ -270,20 +268,21 @@ proc/get_damage_icon_part(damage_state, body_part)
 	//BEGIN CACHED ICON GENERATION.
 
 		//Icon is not cached, generate and store it.
+		var/icon/race_icon
+		var/icon/deform_icon
 
-		// Start by making sure that we have icons available.(Should resolve issue #5451)
-		if (!race_icon)
-			if(skeleton)
-				race_icon = 'icons/mob/human_races/r_skeleton.dmi'
-			else
-				//Icon data is kept in species datums within the mob.
-				race_icon = species.icobase
-				deform_icon = species.deform
+		if(skeleton)
+			race_icon = 'icons/mob/human_races/r_skeleton.dmi'
+			deform_icon = 'icons/mob/human_races/r_skeleton.dmi'
+		else
+			//Icon data is kept in species datums within the mob.
+			race_icon = species.icobase
+			deform_icon = species.deform
 
 		//Robotic limbs are handled in get_icon() so all we worry about are missing or dead limbs.
 		//No icon stored, so we need to start with a basic one.
 		var/datum/organ/external/chest = get_organ("chest")
-		base_icon = chest.get_icon(g)
+		base_icon = chest.get_icon(race_icon,deform_icon,g)
 
 		if(chest.status & ORGAN_DEAD)
 			base_icon.ColorTone(necrosis_color_mod)
@@ -297,9 +296,9 @@ proc/get_damage_icon_part(damage_state, body_part)
 				continue
 
 			if (istype(part, /datum/organ/external/groin) || istype(part, /datum/organ/external/head))
-				temp = part.get_icon(g)
+				temp = part.get_icon(race_icon,deform_icon, g)
 			else
-				temp = part.get_icon()
+				temp = part.get_icon(race_icon,deform_icon)
 
 			if(part.status & ORGAN_DEAD)
 				temp.ColorTone(necrosis_color_mod)
