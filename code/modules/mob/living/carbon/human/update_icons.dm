@@ -270,11 +270,21 @@ proc/get_damage_icon_part(damage_state, body_part)
 	//BEGIN CACHED ICON GENERATION.
 
 		//Icon is not cached, generate and store it.
+
+		// Start by making sure that we have icons available.(Should resolve issue #5451)
+		if (!race_icon)
+			if(skeleton)
+				race_icon = 'icons/mob/human_races/r_skeleton.dmi'
+			else
+				//Icon data is kept in species datums within the mob.
+				race_icon = species.icobase
+				deform_icon = species.deform
+
 		//Robotic limbs are handled in get_icon() so all we worry about are missing or dead limbs.
 		//No icon stored, so we need to start with a basic one.
 		var/datum/organ/external/chest = get_organ("chest")
 		base_icon = chest.get_icon(g)
-		
+
 		if(chest.status & ORGAN_DEAD)
 			base_icon.ColorTone(necrosis_color_mod)
 			base_icon.SetIntensity(0.7)
@@ -479,6 +489,11 @@ proc/get_damage_icon_part(damage_state, body_part)
 //	var/g = "m"
 //	if (gender == FEMALE)	g = "f"
 //BS12 EDIT
+
+/* #JMO I don't think this is necessary, we make it more robust by checking for this when we do our caching.
+	I've checked the code and the only time race_icon is used is in the organ get_icon procs, and THOSE
+	are only ever called when we render the cached icons.
+
 	var/skeleton = (SKELETON in src.mutations)
 	if(skeleton)
 		race_icon = 'icons/mob/human_races/r_skeleton.dmi'
@@ -486,7 +501,7 @@ proc/get_damage_icon_part(damage_state, body_part)
 		//Icon data is kept in species datums within the mob.
 		race_icon = species.icobase
 		deform_icon = species.deform
-
+*/
 	if(dna)
 		switch(dna.mutantrace)
 			if("golem","slime","shadow","adamantine")
